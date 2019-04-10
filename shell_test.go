@@ -54,7 +54,7 @@ func TestAddWithCat(t *testing.T) {
 	mhash, err := s.Add(bytes.NewBufferString(rand))
 	is.Nil(err)
 
-	reader, err := s.Cat(mhash)
+	reader, err := s.Cat(mhash.Hash)
 	is.Nil(err)
 
 	buf := new(bytes.Buffer)
@@ -75,7 +75,7 @@ func TestAddOnlyHash(t *testing.T) {
 	mhash, err := s.Add(bytes.NewBufferString(rand), OnlyHash(true))
 	is.Nil(err)
 
-	_, err = s.Cat(mhash)
+	_, err = s.Cat(mhash.Hash)
 	is.Err(err) // we expect an http timeout error because `cat` won't find the `rand` string
 }
 
@@ -90,7 +90,7 @@ func TestAddNoPin(t *testing.T) {
 	pins, err := s.Pins()
 	is.Nil(err)
 
-	_, ok := pins[h]
+	_, ok := pins[h.Hash]
 	is.False(ok)
 }
 
@@ -105,7 +105,7 @@ func TestAddNoPinDeprecated(t *testing.T) {
 	pins, err := s.Pins()
 	is.Nil(err)
 
-	_, ok := pins[h]
+	_, ok := pins[h.Hash]
 	is.False(ok)
 }
 
@@ -152,7 +152,7 @@ func TestList(t *testing.T) {
 	list, err := s.List(fmt.Sprintf("/ipfs/%s", examplesHash))
 	is.Nil(err)
 
-	is.Equal(len(list), 7)
+	is.Equal(len(list.Links), 7)
 
 	// TODO: document difference in size between 'ipfs ls' and 'ipfs file ls -v'. additional object encoding in data block?
 	expected := map[string]LsLink{
@@ -164,7 +164,7 @@ func TestList(t *testing.T) {
 		"readme":         {Type: TFile, Hash: "QmPZ9gcCEpqKTo6aq61g2nXGUhM4iCL3ewB6LDXZCtioEB", Name: "readme", Size: 1091},
 		"security-notes": {Type: TFile, Hash: "QmQ5vhrL7uv6tuoN9KeVBwd4PwfQkXdVVmDLUZuTNxqgvm", Name: "security-notes", Size: 1162},
 	}
-	for _, l := range list {
+	for _, l := range list.Links {
 		el, ok := expected[l.Name]
 		is.True(ok)
 		is.NotNil(el)
@@ -214,25 +214,25 @@ func TestPins(t *testing.T) {
 	pins, err := s.Pins()
 	is.Nil(err)
 
-	_, ok := pins[h]
+	_, ok := pins[h.Hash]
 	is.True(ok)
 
-	err = s.Unpin(h)
+	err = s.Unpin(h.Hash)
 	is.Nil(err)
 
 	pins, err = s.Pins()
 	is.Nil(err)
 
-	_, ok = pins[h]
+	_, ok = pins[h.Hash]
 	is.False(ok)
 
-	err = s.Pin(h)
+	err = s.Pin(h.Hash)
 	is.Nil(err)
 
 	pins, err = s.Pins()
 	is.Nil(err)
 
-	info, ok := pins[h]
+	info, ok := pins[h.Hash]
 	is.True(ok)
 	is.Equal(info.Type, RecursivePin)
 }
@@ -409,7 +409,8 @@ func TestRefs(t *testing.T) {
 	cid, err := s.AddDir("./testdata")
 	is.Nil(err)
 	is.Equal(cid, "QmS4ustL54uo8FzR9455qaxZwuMiUhyvMcX9Ba8nUH4uVv")
-	refs, err := s.Refs(cid, false)
+	i := len(cid)
+	refs, err := s.Refs(cid[i-1].Hash, false)
 	is.Nil(err)
 	expected := []string{
 		"QmZTR5bcpQD7cFgTorqxZDYaew1Wqgfbd2ud9QqGPAkK2V",

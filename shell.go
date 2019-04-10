@@ -16,10 +16,10 @@ import (
 	"time"
 
 	files "github.com/ipfs/go-ipfs-files"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	ma "github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
-	tar "github.com/whyrusleeping/tar-utils"
+	"github.com/whyrusleeping/tar-utils"
 
 	p2pmetrics "github.com/libp2p/go-libp2p-metrics"
 )
@@ -156,7 +156,7 @@ const (
 )
 
 // List entries at the given path
-func (s *Shell) List(path string) ([]*LsLink, error) {
+func (s *Shell) List(path string) (*LsObject, error) {
 	var out struct{ Objects []LsObject }
 	err := s.Request("ls", path).Exec(context.Background(), &out)
 	if err != nil {
@@ -165,7 +165,7 @@ func (s *Shell) List(path string) ([]*LsLink, error) {
 	if len(out.Objects) != 1 {
 		return nil, errors.New("bad response from server")
 	}
-	return out.Objects[0].Links, nil
+	return &out.Objects[0], nil
 }
 
 // LsLink ...
