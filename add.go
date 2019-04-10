@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 
 	"github.com/ipfs/go-ipfs-files"
@@ -69,6 +70,30 @@ func RawLeaves(enabled bool) AddOpts {
 		rb.Option("raw-leaves", enabled)
 		return nil
 	}
+}
+
+// AddFile ...
+func (s *Shell) AddFile(pathname string) (*Object, error) {
+	stat, err := os.Lstat(pathname)
+	if err != nil {
+		return nil, err
+	}
+
+	sf, err := files.NewSerialFile(pathname, false, stat)
+	if err != nil {
+		return nil, err
+	}
+
+	_, file := filepath.Split(pathname)
+	slf := files.NewSliceDirectory([]files.DirEntry{files.FileEntry(path.Base(file), sf)})
+	fileReader := files.NewMultiFileReader(slf, true)
+
+	var out Object
+	e := s.Request("add").Body(fileReader).Exec(context.Background(), &out)
+	if e != nil {
+		return &Object{}, e
+	}
+	return &out, e
 }
 
 // Add ...

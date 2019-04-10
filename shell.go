@@ -121,12 +121,12 @@ type IDOutput struct {
 //
 // peer: peer.ID of the node to look up.  If no peer is specified,
 //   return information about the local peer.
-func (s *Shell) ID(peer ...string) (*IdOutput, error) {
+func (s *Shell) ID(peer ...string) (*IDOutput, error) {
 	if len(peer) > 1 {
 		return nil, fmt.Errorf("Too many peer arguments")
 	}
 
-	var out IdOutput
+	var out IDOutput
 	if err := s.Request("id", peer...).Exec(context.Background(), &out); err != nil {
 		return nil, err
 	}
@@ -275,7 +275,7 @@ func (s *Shell) Refs(hash string, recursive bool) (<-chan string, error) {
 
 // Patch ...
 func (s *Shell) Patch(root, action string, args ...string) (string, error) {
-	var out object
+	var out Object
 	return out.Hash, s.Request("object/patch/"+action, root).
 		Arguments(args...).
 		Exec(context.Background(), &out)
@@ -304,7 +304,7 @@ func (s *Shell) PatchData(root string, set bool, data interface{}) (string, erro
 	slf := files.NewSliceDirectory([]files.DirEntry{files.FileEntry("", fr)})
 	fileReader := files.NewMultiFileReader(slf, true)
 
-	var out object
+	var out Object
 	return out.Hash, s.Request("object/patch/"+cmd, root).
 		Body(fileReader).
 		Exec(context.Background(), &out)
@@ -312,7 +312,7 @@ func (s *Shell) PatchData(root string, set bool, data interface{}) (string, erro
 
 // PatchLink ...
 func (s *Shell) PatchLink(root, path, childhash string, create bool) (string, error) {
-	var out object
+	var out Object
 	return out.Hash, s.Request("object/patch/add-link", root, path, childhash).
 		Option("create", create).
 		Exec(context.Background(), &out)
@@ -336,7 +336,7 @@ func (s *Shell) Get(hash, outdir string) error {
 
 // NewObject ...
 func (s *Shell) NewObject(template string) (string, error) {
-	var out object
+	var out Object
 	req := s.Request("object/new")
 	if template != "" {
 		req.Arguments(template)
@@ -455,7 +455,7 @@ func (s *Shell) ObjectPut(obj *IpfsObject) (string, error) {
 	slf := files.NewSliceDirectory([]files.DirEntry{files.FileEntry("", fr)})
 	fileReader := files.NewMultiFileReader(slf, true)
 
-	var out object
+	var out Object
 	return out.Hash, s.Request("object/put").
 		Body(fileReader).
 		Exec(context.Background(), &out)
