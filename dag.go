@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/ipfs/go-ipfs-api/options"
+	"github.com/godcong/go-ipfs-restapi/options"
 	"github.com/ipfs/go-ipfs-files"
 )
 

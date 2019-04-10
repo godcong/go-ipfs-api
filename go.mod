@@ -1,4 +1,4 @@
-module github.com/ipfs/go-ipfs-api
+module github.com/godcong/go-ipfs-restapi
 
 require (
 	github.com/cheekybits/is v0.0.0-20150225183255-68e9c0620927
