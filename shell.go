@@ -1,4 +1,4 @@
-// package shell implements a remote API interface for a running ipfs daemon
+//Package shell implements a remote API interface for a running ipfs daemon
 package shell
 
 import (
@@ -24,18 +24,21 @@ import (
 	p2pmetrics "github.com/libp2p/go-libp2p-metrics"
 )
 
+// DefaultPathName ...
 const (
 	DefaultPathName = ".ipfs"
 	DefaultPathRoot = "~/" + DefaultPathName
-	DefaultApiFile  = "api"
+	DefaultAPIFile  = "api"
 	EnvDir          = "IPFS_PATH"
 )
 
+// Shell ...
 type Shell struct {
 	url     string
 	httpcli gohttp.Client
 }
 
+// NewLocalShell ...
 func NewLocalShell() *Shell {
 	baseDir := os.Getenv(EnvDir)
 	if baseDir == "" {
@@ -47,7 +50,7 @@ func NewLocalShell() *Shell {
 		return nil
 	}
 
-	apiFile := path.Join(baseDir, DefaultApiFile)
+	apiFile := path.Join(baseDir, DefaultAPIFile)
 
 	if _, err := os.Stat(apiFile); err != nil {
 		return nil
@@ -61,6 +64,7 @@ func NewLocalShell() *Shell {
 	return NewShell(strings.TrimSpace(string(api)))
 }
 
+// NewShell ...
 func NewShell(url string) *Shell {
 	c := &gohttp.Client{
 		Transport: &gohttp.Transport{
@@ -72,6 +76,7 @@ func NewShell(url string) *Shell {
 	return NewShellWithClient(url, c)
 }
 
+// NewShellWithClient ...
 func NewShellWithClient(url string, c *gohttp.Client) *Shell {
 	if a, err := ma.NewMultiaddr(url); err == nil {
 		_, host, err := manet.DialArgs(a)
@@ -89,10 +94,12 @@ func NewShellWithClient(url string, c *gohttp.Client) *Shell {
 	return &sh
 }
 
+// SetTimeout ...
 func (s *Shell) SetTimeout(d time.Duration) {
 	s.httpcli.Timeout = d
 }
 
+// Request ...
 func (s *Shell) Request(command string, args ...string) *RequestBuilder {
 	return &RequestBuilder{
 		command: command,
@@ -101,7 +108,8 @@ func (s *Shell) Request(command string, args ...string) *RequestBuilder {
 	}
 }
 
-type IdOutput struct {
+// IDOutput ...
+type IDOutput struct {
 	ID              string
 	PublicKey       string
 	Addresses       []string
@@ -138,6 +146,7 @@ func (s *Shell) Cat(path string) (io.ReadCloser, error) {
 	return resp.Output, nil
 }
 
+// TRaw ...
 const (
 	TRaw = iota
 	TDirectory
@@ -159,6 +168,7 @@ func (s *Shell) List(path string) ([]*LsLink, error) {
 	return out.Objects[0].Links, nil
 }
 
+// LsLink ...
 type LsLink struct {
 	Hash string
 	Name string
@@ -166,6 +176,7 @@ type LsLink struct {
 	Type int
 }
 
+// LsObject ...
 type LsObject struct {
 	Links []*LsLink
 	LsLink
@@ -185,12 +196,14 @@ func (s *Shell) Unpin(path string) error {
 		Exec(context.Background(), nil)
 }
 
+// DirectPin ...
 const (
 	DirectPin    = "direct"
 	RecursivePin = "recursive"
 	IndirectPin  = "indirect"
 )
 
+// PinInfo ...
 type PinInfo struct {
 	Type string
 }
@@ -205,11 +218,13 @@ func (s *Shell) Pins() (map[string]PinInfo, error) {
 	return raw.Keys, s.Request("pin/ls").Exec(context.Background(), &raw)
 }
 
+// PeerInfo ...
 type PeerInfo struct {
 	Addrs []string
 	ID    string
 }
 
+// FindPeer ...
 func (s *Shell) FindPeer(peer string) (*PeerInfo, error) {
 	var peers struct{ Responses []PeerInfo }
 	err := s.Request("dht/findpeer", peer).Exec(context.Background(), &peers)
@@ -222,6 +237,7 @@ func (s *Shell) FindPeer(peer string) (*PeerInfo, error) {
 	return &peers.Responses[0], nil
 }
 
+// Refs ...
 func (s *Shell) Refs(hash string, recursive bool) (<-chan string, error) {
 	resp, err := s.Request("refs", hash).
 		Option("recursive", recursive).
@@ -257,6 +273,7 @@ func (s *Shell) Refs(hash string, recursive bool) (<-chan string, error) {
 	return out, nil
 }
 
+// Patch ...
 func (s *Shell) Patch(root, action string, args ...string) (string, error) {
 	var out object
 	return out.Hash, s.Request("object/patch/"+action, root).
@@ -264,6 +281,7 @@ func (s *Shell) Patch(root, action string, args ...string) (string, error) {
 		Exec(context.Background(), &out)
 }
 
+// PatchData ...
 func (s *Shell) PatchData(root string, set bool, data interface{}) (string, error) {
 	var read io.Reader
 	switch d := data.(type) {
@@ -292,6 +310,7 @@ func (s *Shell) PatchData(root string, set bool, data interface{}) (string, erro
 		Exec(context.Background(), &out)
 }
 
+// PatchLink ...
 func (s *Shell) PatchLink(root, path, childhash string, create bool) (string, error) {
 	var out object
 	return out.Hash, s.Request("object/patch/add-link", root, path, childhash).
@@ -299,6 +318,7 @@ func (s *Shell) PatchLink(root, path, childhash string, create bool) (string, er
 		Exec(context.Background(), &out)
 }
 
+// Get ...
 func (s *Shell) Get(hash, outdir string) error {
 	resp, err := s.Request("get", hash).Option("create", true).Send(context.Background())
 	if err != nil {
@@ -314,6 +334,7 @@ func (s *Shell) Get(hash, outdir string) error {
 	return extractor.Extract(resp.Output)
 }
 
+// NewObject ...
 func (s *Shell) NewObject(template string) (string, error) {
 	var out object
 	req := s.Request("object/new")
@@ -323,6 +344,7 @@ func (s *Shell) NewObject(template string) (string, error) {
 	return out.Hash, req.Exec(context.Background(), &out)
 }
 
+// ResolvePath ...
 func (s *Shell) ResolvePath(path string) (string, error) {
 	var out struct {
 		Path string
@@ -335,7 +357,7 @@ func (s *Shell) ResolvePath(path string) (string, error) {
 	return strings.TrimPrefix(out.Path, "/ipfs/"), nil
 }
 
-// returns ipfs version and commit sha
+//Version returns ipfs version and commit sha
 func (s *Shell) Version() (string, string, error) {
 	ver := struct {
 		Version string
@@ -348,11 +370,13 @@ func (s *Shell) Version() (string, string, error) {
 	return ver.Version, ver.Commit, nil
 }
 
+// IsUp ...
 func (s *Shell) IsUp() bool {
 	_, _, err := s.Version()
 	return err == nil
 }
 
+// BlockStat ...
 func (s *Shell) BlockStat(path string) (string, int, error) {
 	var inf struct {
 		Key  string
@@ -365,6 +389,7 @@ func (s *Shell) BlockStat(path string) (string, int, error) {
 	return inf.Key, inf.Size, nil
 }
 
+// BlockGet ...
 func (s *Shell) BlockGet(path string) ([]byte, error) {
 	resp, err := s.Request("block/get", path).Send(context.Background())
 	if err != nil {
@@ -379,6 +404,7 @@ func (s *Shell) BlockGet(path string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Output)
 }
 
+// BlockPut ...
 func (s *Shell) BlockPut(block []byte, format, mhtype string, mhlen int) (string, error) {
 	var out struct {
 		Key string
@@ -396,16 +422,19 @@ func (s *Shell) BlockPut(block []byte, format, mhtype string, mhlen int) (string
 		Exec(context.Background(), &out)
 }
 
+// IpfsObject ...
 type IpfsObject struct {
 	Links []ObjectLink
 	Data  string
 }
 
+// ObjectLink ...
 type ObjectLink struct {
 	Name, Hash string
 	Size       uint64
 }
 
+// ObjectGet ...
 func (s *Shell) ObjectGet(path string) (*IpfsObject, error) {
 	var obj IpfsObject
 	if err := s.Request("object/get", path).Exec(context.Background(), &obj); err != nil {
@@ -414,6 +443,7 @@ func (s *Shell) ObjectGet(path string) (*IpfsObject, error) {
 	return &obj, nil
 }
 
+// ObjectPut ...
 func (s *Shell) ObjectPut(obj *IpfsObject) (string, error) {
 	var data bytes.Buffer
 	err := json.NewEncoder(&data).Encode(obj)
@@ -431,6 +461,7 @@ func (s *Shell) ObjectPut(obj *IpfsObject) (string, error) {
 		Exec(context.Background(), &out)
 }
 
+// PubSubSubscribe ...
 func (s *Shell) PubSubSubscribe(topic string) (*PubSubSubscription, error) {
 	// connect
 	resp, err := s.Request("pubsub/sub", topic).Send(context.Background())
@@ -440,6 +471,7 @@ func (s *Shell) PubSubSubscribe(topic string) (*PubSubSubscription, error) {
 	return newPubSubSubscription(resp), nil
 }
 
+// PubSubPublish ...
 func (s *Shell) PubSubPublish(topic, data string) (err error) {
 	resp, err := s.Request("pubsub/pub", topic, data).Send(context.Background())
 	if err != nil {
@@ -452,6 +484,7 @@ func (s *Shell) PubSubPublish(topic, data string) (err error) {
 	return nil
 }
 
+// ObjectStats ...
 type ObjectStats struct {
 	Hash           string
 	BlockSize      int
@@ -472,7 +505,7 @@ func (s *Shell) ObjectStat(key string) (*ObjectStats, error) {
 	return &stat, nil
 }
 
-// ObjectStat gets stats for the DAG object named by key. It returns
+// StatsBW gets stats for the DAG object named by key. It returns
 // the stats of the requested Object or an error.
 func (s *Shell) StatsBW(ctx context.Context) (*p2pmetrics.Stats, error) {
 	v := &p2pmetrics.Stats{}
@@ -480,10 +513,12 @@ func (s *Shell) StatsBW(ctx context.Context) (*p2pmetrics.Stats, error) {
 	return v, err
 }
 
+// SwarmStreamInfo ...
 type SwarmStreamInfo struct {
 	Protocol string
 }
 
+// SwarmConnInfo ...
 type SwarmConnInfo struct {
 	Addr    string
 	Peer    string
@@ -492,6 +527,7 @@ type SwarmConnInfo struct {
 	Streams []SwarmStreamInfo
 }
 
+// SwarmConnInfos ...
 type SwarmConnInfos struct {
 	Peers []SwarmConnInfo
 }

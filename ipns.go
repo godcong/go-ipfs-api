@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// PublishResponse ...
 type PublishResponse struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`

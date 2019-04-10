@@ -29,6 +29,7 @@ func DagPutOptions(opts ...DagPutOption) (*DagPutSettings, error) {
 
 type dagOpts struct{}
 
+// Dag ...
 var Dag dagOpts
 
 // Pin is an option for Dag.Put which specifies whether to pin the added

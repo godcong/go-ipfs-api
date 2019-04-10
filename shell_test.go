@@ -18,21 +18,23 @@ import (
 
 const (
 	examplesHash = "QmS4ustL54uo8FzR9455qaxZwuMiUhyvMcX9Ba8nUH4uVv"
-	shellUrl     = "localhost:5001"
+	shellURL     = "localhost:5001"
 )
 
+// TestAdd ...
 func TestAdd(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	mhash, err := s.Add(bytes.NewBufferString("Hello IPFS Shell tests"))
 	is.Nil(err)
 	is.Equal(mhash, "QmUfZ9rAdhV5ioBzXKdUTh2ZNsz9bzbkaLVyQ8uc8pj21F")
 }
 
+// TestRedirect ...
 func TestRedirect(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	err := s.
 		Request("/version").
@@ -41,9 +43,10 @@ func TestRedirect(t *testing.T) {
 	is.True(strings.Contains(err.Error(), "unexpected redirect"))
 }
 
+// TestAddWithCat ...
 func TestAddWithCat(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 	s.SetTimeout(1 * time.Second)
 
 	rand := randString(32)
@@ -61,9 +64,10 @@ func TestAddWithCat(t *testing.T) {
 	is.Equal(rand, catRand)
 }
 
+// TestAddOnlyHash ...
 func TestAddOnlyHash(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 	s.SetTimeout(1 * time.Second)
 
 	rand := randString(32)
@@ -75,9 +79,10 @@ func TestAddOnlyHash(t *testing.T) {
 	is.Err(err) // we expect an http timeout error because `cat` won't find the `rand` string
 }
 
+// TestAddNoPin ...
 func TestAddNoPin(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	h, err := s.Add(bytes.NewBufferString(randString(32)), Pin(false))
 	is.Nil(err)
@@ -89,9 +94,10 @@ func TestAddNoPin(t *testing.T) {
 	is.False(ok)
 }
 
+// TestAddNoPinDeprecated ...
 func TestAddNoPinDeprecated(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	h, err := s.AddNoPin(bytes.NewBufferString(randString(32)))
 	is.Nil(err)
@@ -103,15 +109,17 @@ func TestAddNoPinDeprecated(t *testing.T) {
 	is.False(ok)
 }
 
+// TestAddDir ...
 func TestAddDir(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	cid, err := s.AddDir("./testdata")
 	is.Nil(err)
 	is.Equal(cid, "QmS4ustL54uo8FzR9455qaxZwuMiUhyvMcX9Ba8nUH4uVv")
 }
 
+// TestLocalShell ...
 func TestLocalShell(t *testing.T) {
 	is := is.New(t)
 	s := NewLocalShell()
@@ -122,9 +130,10 @@ func TestLocalShell(t *testing.T) {
 	is.Equal(mhash, "QmUfZ9rAdhV5ioBzXKdUTh2ZNsz9bzbkaLVyQ8uc8pj21F")
 }
 
+// TestCat ...
 func TestCat(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	rc, err := s.Cat(fmt.Sprintf("/ipfs/%s/readme", examplesHash))
 	is.Nil(err)
@@ -135,9 +144,10 @@ func TestCat(t *testing.T) {
 	is.Equal(fmt.Sprintf("%x", md5.Sum(nil)), "3fdcaad186e79983a6920b4c7eeda949")
 }
 
+// TestList ...
 func TestList(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	list, err := s.List(fmt.Sprintf("/ipfs/%s", examplesHash))
 	is.Nil(err)
@@ -162,9 +172,10 @@ func TestList(t *testing.T) {
 	}
 }
 
+// TestFileList ...
 func TestFileList(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	list, err := s.FileList(fmt.Sprintf("/ipfs/%s", examplesHash))
 	is.Nil(err)
@@ -191,9 +202,10 @@ func TestFileList(t *testing.T) {
 	}
 }
 
+// TestPins ...
 func TestPins(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	// Add a thing, which pins it by default
 	h, err := s.Add(bytes.NewBufferString("go-ipfs-api pins test 9F3D1F30-D12A-4024-9477-8F0C8E4B3A63"))
@@ -225,17 +237,19 @@ func TestPins(t *testing.T) {
 	is.Equal(info.Type, RecursivePin)
 }
 
+// TestPatch_rmLink ...
 func TestPatch_rmLink(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 	newRoot, err := s.Patch(examplesHash, "rm-link", "about")
 	is.Nil(err)
 	is.Equal(newRoot, "QmPmCJpciopaZnKcwymfQyRAEjXReR6UL2rdSfEscZfzcp")
 }
 
+// TestPatchLink ...
 func TestPatchLink(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 	newRoot, err := s.PatchLink(examplesHash, "about", "QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw", true)
 	is.Nil(err)
 	is.Equal(newRoot, "QmVfe7gesXf4t9JzWePqqib8QSifC1ypRBGeJHitSnF7fA")
@@ -251,18 +265,20 @@ func TestPatchLink(t *testing.T) {
 	is.Equal(newHash, "QmQ5D3xbMWFQRC9BKqbvnSnHri31GqvtWG1G6rE8xAZf1J")
 }
 
+// TestResolvePath ...
 func TestResolvePath(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	childHash, err := s.ResolvePath(fmt.Sprintf("/ipfs/%s/about", examplesHash))
 	is.Nil(err)
 	is.Equal(childHash, "QmZTR5bcpQD7cFgTorqxZDYaew1Wqgfbd2ud9QqGPAkK2V")
 }
 
+// TestPubSub ...
 func TestPubSub(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	var (
 		topic = "test"
@@ -310,10 +326,11 @@ func TestPubSub(t *testing.T) {
 	is.Nil(sub.Cancel())
 }
 
+// TestObjectStat ...
 func TestObjectStat(t *testing.T) {
 	obj := "QmZTR5bcpQD7cFgTorqxZDYaew1Wqgfbd2ud9QqGPAkK2V"
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 	stat, err := s.ObjectStat("QmZTR5bcpQD7cFgTorqxZDYaew1Wqgfbd2ud9QqGPAkK2V")
 	is.Nil(err)
 	is.Equal(stat.Hash, obj)
@@ -321,34 +338,38 @@ func TestObjectStat(t *testing.T) {
 	is.Equal(stat.CumulativeSize, 1688)
 }
 
+// TestDagPut ...
 func TestDagPut(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	c, err := s.DagPut(`{"x": "abc","y":"def"}`, "json", "cbor")
 	is.Nil(err)
 	is.Equal(c, "zdpuAt47YjE9XTgSxUBkiYCbmnktKajQNheQBGASHj3FfYf8M")
 }
 
+// TestDagPutWithOpts ...
 func TestDagPutWithOpts(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	c, err := s.DagPutWithOpts(`{"x": "abc","y":"def"}`, options.Dag.Pin("true"))
 	is.Nil(err)
 	is.Equal(c, "zdpuAt47YjE9XTgSxUBkiYCbmnktKajQNheQBGASHj3FfYf8M")
 }
 
+// TestStatsBW ...
 func TestStatsBW(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 	_, err := s.StatsBW(context.Background())
 	is.Nil(err)
 }
 
+// TestSwarmPeers ...
 func TestSwarmPeers(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 	_, err := s.SwarmPeers(context.Background())
 	is.Nil(err)
 }
@@ -380,9 +401,10 @@ func randString(n int) string {
 	return string(b)
 }
 
+// TestRefs ...
 func TestRefs(t *testing.T) {
 	is := is.New(t)
-	s := NewShell(shellUrl)
+	s := NewShell(shellURL)
 
 	cid, err := s.AddDir("./testdata")
 	is.Nil(err)

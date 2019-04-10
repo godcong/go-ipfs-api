@@ -7,6 +7,7 @@ import (
 	"github.com/cheekybits/is"
 )
 
+// TestRequestBuilder ...
 func TestRequestBuilder(t *testing.T) {
 	is := is.New(t)
 

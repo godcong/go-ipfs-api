@@ -15,9 +15,10 @@ import (
 	files "github.com/ipfs/go-ipfs-files"
 )
 
+// Request ...
 type Request struct {
 	Ctx     context.Context
-	ApiBase string
+	APIBase string
 	Command string
 	Args    []string
 	Opts    map[string]string
@@ -25,6 +26,7 @@ type Request struct {
 	Headers map[string]string
 }
 
+// NewRequest ...
 func NewRequest(ctx context.Context, url, command string, args ...string) *Request {
 	if !strings.HasPrefix(url, "http") {
 		url = "http://" + url
@@ -36,7 +38,7 @@ func NewRequest(ctx context.Context, url, command string, args ...string) *Reque
 	}
 	return &Request{
 		Ctx:     ctx,
-		ApiBase: url + "/api/v0",
+		APIBase: url + "/api/v0",
 		Command: command,
 		Args:    args,
 		Opts:    opts,
@@ -48,6 +50,7 @@ type trailerReader struct {
 	resp *http.Response
 }
 
+// Read ...
 func (r *trailerReader) Read(b []byte) (int, error) {
 	n, err := r.resp.Body.Read(b)
 	if err != nil {
@@ -58,15 +61,18 @@ func (r *trailerReader) Read(b []byte) (int, error) {
 	return n, err
 }
 
+// Close ...
 func (r *trailerReader) Close() error {
 	return r.resp.Body.Close()
 }
 
+// Response ...
 type Response struct {
 	Output io.ReadCloser
 	Error  *Error
 }
 
+// Close ...
 func (r *Response) Close() error {
 	if r.Output != nil {
 		// always drain output (response body)
@@ -82,6 +88,7 @@ func (r *Response) Close() error {
 	return nil
 }
 
+// Decode ...
 func (r *Response) Decode(dec interface{}) error {
 	defer r.Close()
 	if r.Error != nil {
@@ -91,12 +98,14 @@ func (r *Response) Decode(dec interface{}) error {
 	return json.NewDecoder(r.Output).Decode(dec)
 }
 
+// Error ...
 type Error struct {
 	Command string
 	Message string
 	Code    int
 }
 
+// Error ...
 func (e *Error) Error() string {
 	var out string
 	if e.Command != "" {
@@ -108,6 +117,7 @@ func (e *Error) Error() string {
 	return out + e.Message
 }
 
+// Send ...
 func (r *Request) Send(c *http.Client) (*Response, error) {
 	url := r.getURL()
 	req, err := http.NewRequest("POST", url, r.Body)
@@ -185,5 +195,5 @@ func (r *Request) getURL() string {
 		values.Add(k, v)
 	}
 
-	return fmt.Sprintf("%s/%s?%s", r.ApiBase, r.Command, values.Encode())
+	return fmt.Sprintf("%s/%s?%s", r.APIBase, r.Command, values.Encode())
 }

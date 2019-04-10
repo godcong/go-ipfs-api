@@ -9,6 +9,7 @@ import (
 var examplesHashForIPNS = "/ipfs/Qmbu7x6gJbsKDcseQv66pSbUcAA3Au6f7MfTYVXwvBxN2K"
 var testKey = "self" // feel free to change to whatever key you have locally
 
+// TestPublishDetailsWithKey ...
 func TestPublishDetailsWithKey(t *testing.T) {
 	t.Skip()
 	shell := NewShell("localhost:5001")
@@ -23,6 +24,7 @@ func TestPublishDetailsWithKey(t *testing.T) {
 	}
 }
 
+// TestPublishDetailsWithoutKey ...
 func TestPublishDetailsWithoutKey(t *testing.T) {
 	t.Skip()
 	shell := NewShell("localhost:5001")

@@ -11,14 +11,17 @@ import (
 	"github.com/ipfs/go-ipfs-files"
 )
 
+// DagGet ...
 func (s *Shell) DagGet(ref string, out interface{}) error {
 	return s.Request("dag/get", ref).Exec(context.Background(), out)
 }
 
+// DagPut ...
 func (s *Shell) DagPut(data interface{}, ienc, kind string) (string, error) {
 	return s.DagPutWithOpts(data, options.Dag.InputEnc(ienc), options.Dag.Kind(kind))
 }
 
+// DagPutWithOpts ...
 func (s *Shell) DagPutWithOpts(data interface{}, opts ...options.DagPutOption) (string, error) {
 	cfg, err := options.DagPutOptions(opts...)
 	if err != nil {

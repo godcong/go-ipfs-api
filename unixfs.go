@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// UnixLsObject ...
 type UnixLsObject struct {
 	Hash  string
 	Size  uint64
@@ -12,6 +13,7 @@ type UnixLsObject struct {
 	Links []*UnixLsLink
 }
 
+// UnixLsLink ...
 type UnixLsLink struct {
 	Hash string
 	Name string
