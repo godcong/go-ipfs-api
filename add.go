@@ -33,7 +33,7 @@ func (r *Object) UnmarshalJSON(b []byte) error {
 	}
 	r.Size, _ = strconv.ParseUint(out.Size, 10, 64)
 	r.Hash = out.Hash
-	_, r.Name = path.Split(out.Name)
+	r.Name = out.Name
 	return nil
 }
 
