@@ -33,7 +33,7 @@ func (r *Object) UnmarshalJSON(b []byte) error {
 	}
 	r.Size, _ = strconv.ParseUint(out.Size, 10, 64)
 	r.Hash = out.Hash
-	_, r.Name = path.Split(out.Name)
+	r.Name = out.Name
 	return nil
 }
 
@@ -151,7 +151,7 @@ func (s *Shell) AddDir(dir string) ([]*Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	slf := files.NewSliceDirectory([]files.DirEntry{files.FileEntry(path.Base(dir), sf)})
+	slf := files.NewSliceDirectory([]files.DirEntry{files.FileEntry(filepath.Base(dir), sf)})
 	reader := files.NewMultiFileReader(slf, true)
 
 	resp, err := s.Request("add").
